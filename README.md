@@ -28,7 +28,7 @@ The resources below are provided in order to help complete the predict.
 **Code:**
 
 - [Jupyter Notebook: Python data processing walkthrough](python_data_processing_walkthrough.ipynb)
-- [Event-based lambda function](code/lambda_pipeline_event.py)
+- [Event-based lambda function](code/dag-lambda-trigger.py)
 
 ### Assessments ⏱
 The following actions need to be taken in order to complete the assessments used within the predict:
