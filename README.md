@@ -19,7 +19,7 @@ As part of this migration, raw data, given in the form of company `csv` snapshot
 With the above requirements, your role as a data engineer is to create a robust data pipeline that can extract, transform and load the `csv` data from the source data system to a SQL-based database within AWS. The final pipeline (represented in Figure 1) needs to be built in [Airflow](https://airflow.apache.org/) and should utilise AWS services as its functional components. 
 
 ### Instructions 🧑‍🏫
-A detailed set of instructions guiding you through the creation of the aforementioned data pipeline can be found [here](moving_big_data_student_instructions.md).
+A detailed set of instructions guiding you through the creation of the aforementioned data pipeline can be found [here](moving_big_data_predict_student_instructions.md).
 
 ### Resources 📕
 
