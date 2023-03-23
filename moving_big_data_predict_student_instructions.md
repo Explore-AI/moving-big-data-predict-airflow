@@ -225,10 +225,11 @@ When creating the data pipeline, you will need to store multiple artefacts for d
 
     | EC2 Instance Property | Value | 
     | :-------------------- | :---- | 
-    | AMI       | Amazon Linux 2 (HVM) | 
+    | AMI       | edsa-airflow-ami | 
+    | AMI  ID     | ami-05f67f34b041e3b67 | 
     | Instance type           | `t2.medium` |
     | VPC                   | default |  
-    | Storage                   | 8GB SSD Volume |  
+    | Storage                   | 30GB SSD Volume |  
     | Tag-based name     | ex. "Name: de-mbd-predict-EC2" | 
     | Security Group        | \<Newly created security group\> |  
     | Security key | ex. "ec2-de-mbd-predict-key" |
@@ -242,9 +243,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
          2. **Pandas** to perform the required data manipulation; and
 
          3. **Latest version of the AWS Command Line Interface (CLI)** so that you can interact with AWS services on your EC2 instance. Don't forget to configure your AWS credentials.
-         4. **Airflow** so that you can create the required pipeline
-         5.  **Docker** to containerise your airflow data pipeline
-
+   4. Since you will complete the predict over a few weeks, you may find it useful to set a static IP for your EC2 instance. Otherwise you will have to continously obtain the new IP address that is allocated to your EC2 instance.
             
 
 
@@ -260,7 +259,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
    2. Once you have set up s3fs fuse, the below command can be used to assist in mounting your S3 Bucket.
 
         ```bash
-       s3fs -o iam_role=<ec2-default-role> -o url="[https://s3.eu-west-1.amazonaws.com](https://s3.eu-west-1.amazonaws.com/)" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
+       s3fs -o iam_role=<ec2-default-role> -o url="https://s3.eu-west-1.amazonaws.com" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
        ```
 
 #### Data activities
@@ -364,7 +363,9 @@ Once you've created the pipeline, save and manually activate the pipeline. To en
 
 1. Navigate to the debugging endpoint email address (your personal email) and ensure that a "Pipeline success" message has been sent to your inbox. If this message has not arrived, it may take an additional five minutes before the notification is sent by AWS. If a success signal is not received, hopefully, a "Pipeline failure" message is delivered instead.
 
-2. Use the pgAdmin client to log in to the RDS database and inspect your database table. If the pipeline run was successful, the table should contain the extracted company data produced during the data processing activity.
+2. You can check whether your pipeline is successful by doing the following: 
+   1. Open your Airflow GUI and view your taks logs to assess the completion of your data pipeline.
+   2. Use the pgAdmin client to log in to the RDS database and inspect your database table. If the pipeline run was successful, the table should contain the extracted company data produced during the data processing activity.
 
 
 ## Part-III: Pipeline automation  
@@ -447,12 +448,17 @@ To operate efficiently, the process to trigger your pipeline should be set up to
 
 📝   **Submit CSV with resource details**   📝
 
-Having completed your pipeline, submit a CSV containing your name, surname, source bucket, monitored bucket and the name of your SNS topic. **This will be used for marking purposes.**
+Having completed your pipeline, submit a CSV containing your name, surname, source bucket, monitored bucket, the name of your SNS topic, and the static IP of your EC2 instance. **This will be used for marking purposes.**
 
-| Name | Surname | Source_bucket | Monitored_bucket | SNS_topic |
-|------|---------|---------------|------------------|-----------|
+| Name | Surname | Source_bucket | Monitored_bucket | SNS_topic | Static_IP |
+|------|---------|---------------|------------------|-----------|-----------|
 |Dora | Explorer | de-mbd-predict-dora-explorer-s3-source| de-mbd-predict-dora-explorer-monitored-bucket| de-mbd-predict-dora-explorer-SNS
 
+
+> 📝 **STOP YOUR INSTANCE** 📝
+> 
+> You now that you have completed the pipeline you may **STOP** your instance. Your facilitors will let you know when to turn your EC2 on for marking purpose. 
+> It is important that you **DO NOT TERMINATE** you instanace, you must only **STOP** it. Failuire to adhere to this is instruction will make it impossible to mark your work.
 
 ## Part-IV: Data pipelines MCQ
 [Back to top](#table-of-contents)
@@ -471,4 +477,5 @@ The following is a checklist of all components associated with the implemented p
  - [ ] Event-based S3 bucket
  - [ ] PostgreSQL RDS instance 
  - [ ] Source S3 bucket 
+ - [ ] Containerised Airflow Data Pipeline
  - [ ] Pipeline-based SNS topics and subscriptions
