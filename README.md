@@ -27,7 +27,7 @@ The resources below are provided in order to help complete the predict.
 
 **Code:**
 
-- [Jupyter Notebook: Python data processing walkthrough](python_data_processing_walkthrough.ipynb)
+- [Jupyter Notebook: Python data processing walkthrough](code/python_data_processing_walkthrough.ipynb)
 - [Event-based lambda function](code/dag-lambda-trigger.py)
 
 ### Assessments ⏱
