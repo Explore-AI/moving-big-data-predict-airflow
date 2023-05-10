@@ -405,7 +405,7 @@ As the initial step to enable the event-driven behaviour of your pipeline, you n
                "s3:GetBucketLocation",
                "s3:ListBucket",
                "s3:GetObject",
-               "s3:PutObject",
+               "s3:PutObject"
             ],
             "Resource": [
                "arn:aws:s3:::{Insert-Your-Monitored-Bucket-Name-Here}",
