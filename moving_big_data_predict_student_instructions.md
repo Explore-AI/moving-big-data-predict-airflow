@@ -102,7 +102,7 @@ In this section, you'll be required to implement the various components and laye
 | :------------  | :---------- | 
 | Raw stock data | Provided as `.csv` files, this data contains stock market movement data for over 1000 companies listed on the US stock market. This data will be extracted, processed, and loaded into a relational database as part of the formed data pipeline within the predict. | 
 | Amazon S3      | Stores the stock market data in different forms (raw and processed) during pipeline execution.  |
-| Amazon EC2     | A `t2.micro` instance, housing the dockerised airflow pipeline and providing the compute necessary for data processing within the data pipeline.  | 
+| Amazon EC2     | A `t2.medium` instance, housing the dockerised airflow pipeline and providing the compute necessary for data processing within the data pipeline.  | 
 | Processing script | A Python file describing the processing operations to be performed on the data. |
 | DAG Script| A python file describing the airflow pipeline that is to be executed|
 | Amazon RDS | A `db.t2.micro` PostgreSQL database used as the target data system for the processed data within the pipeline. | 
@@ -137,10 +137,11 @@ As the first step towards building the data pipeline, you are required to set up
 
    | Type | Protocol | Port Range | Source | 
    | ---- | -------- | ---------- | ------ |
-   | PostgreSQL | TCP | 5432 | My IP  | 
+   | PostgreSQL | TCP | 5432 | All IPv4  | 
    | PostgreSQL | TCP | 5432 | \<Newly created security group\>  | 
    | All Traffic| All | All | All IPv4 | 
 
+   > For security reasons, the All IPv4 source for the first PostgreSQL rule should be changed to My IP once testing is done.  
    <br>
 
     - **Outbound rules:** Permit all outbound traffic. 
@@ -181,7 +182,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
  - **Configure the source S3 bucket**
    > ℹ️ &nbsp;**S3 NAMING CONVENTION** &nbsp; ℹ️ 
    > 
-   > Use the following naming convention when creating your S3 bucket within this step: "de-mbd-predict-{firstname}-{lastname}-s3-source". For example, if you were named Dora Explorer, your configured name would be "de-mbd-predict-dora-explorer-s3-source." 
+   > Use the following naming convention when creating your S3 bucket within this step: "de-mbd-predict-{firstname}-{lastname}-s3-source". For example, if you were named Dora Explorer, your configured name would be "de-mbd-predict-dora-explorer-s3-source". 
 
    1. Create an S3 bucket that will be used for the pipeline to store source data, processing scripts, and log files.
    2. To accommodate various pipeline elements, create the following folder structure in your S3 bucket:
@@ -195,7 +196,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
     └── Stocks
     ```
 
-   3. Upload the downloaded `.csv` files to the `Stocks/` folder. Note that this upload may take some time due to the number of files involved in the process.
+   3. Upload the downloaded `.csv` files to the `Stocks/` folder. Note that this upload may take some time due to the number of files involved in the process. Consider using the AWS CLI to achieve this task.    
 
    4. Upload the  [`top_companies.txt`](data/top_companies.txt)file into the `CompanyNames/` folder.
 
@@ -208,7 +209,9 @@ When creating the data pipeline, you will need to store multiple artefacts for d
     | Creation method       | Standard | 
     | Engine type           | PostgreSQL |
     | Version               | 14.6-R1 |
+    | Instance Size         | db.t3.micro |
     | Template              | Free tier | 
+    | Allocated Storage     | 20GB |
     | Storage autoscaling   | Disabled |
     | VPC                   | Default |  
     | Security Group        | \<Newly created security group\> |  
@@ -256,10 +259,10 @@ When creating the data pipeline, you will need to store multiple artefacts for d
    To gain access to the source data and associated processing scripts used within the pipeline, the configured EC2 instance needs to be able to mount the S3 bucket initialised in the previous steps.
 
    1. Make use of the **S3FS Fuse** filesystem application to mount the source S3 bucket to your EC2 instance.
-   2. Once you have set up s3fs fuse, the below command can be used to assist in mounting your S3 Bucket.
+   2. Once you have set up s3fs fuse, the below command can be used to assist in mounting your S3 Bucket. THe command assumes that the directory where the S3 bucket will be mounted is called 's3-drive'
 
         ```bash
-       s3fs -o iam_role=<ec2-default-role> -o url="https://s3.eu-west-1.amazonaws.com" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
+       s3fs -o iam_role=<your-ec2-role> -o url="https://s3.eu-west-1.amazonaws.com" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
        ```
 
 #### Data activities
@@ -314,7 +317,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
 
    > 📝 &nbsp; **TOPIC NAMING CONVENTION**  &nbsp; 📝
    > 
-   > The topic name configured in SNS is utilised during the automated testing of the predict. As such, the following topic naming convention should be used: *"de-mbd-predict-{First-nam}-{Surname}-SNS"*. For example, with the name Dora Explorer, the topic would be named "de-mbd-predict-dora-explorer-SNS".
+   > The topic name configured in SNS is utilised during the automated testing of the predict. As such, the following topic naming convention should be used: *"de-mbd-predict-{First-name}-{Surname}-SNS"*. For example, with the name Dora Explorer, the topic would be named "de-mbd-predict-dora-explorer-SNS".
  
  - **Set up Amazon SNS pipeline monitoring alert**
 
