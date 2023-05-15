@@ -455,7 +455,7 @@ Having completed your pipeline, submit a CSV containing your name, surname, sour
 
 | Name | Surname | Source_bucket | Monitored_bucket | SNS_topic | Static_IP |
 |------|---------|---------------|------------------|-----------|-----------|
-|Dora | Explorer | de-mbd-predict-dora-explorer-s3-source| de-mbd-predict-dora-explorer-monitored-bucket| de-mbd-predict-dora-explorer-SNS
+|Dora | Explorer | de-mbd-predict-dora-explorer-s3-source| de-mbd-predict-dora-explorer-monitored-bucket| de-mbd-predict-dora-explorer-SNS | 10.20.30.40 |
 
 
 > 📝 **STOP YOUR INSTANCE** 📝
