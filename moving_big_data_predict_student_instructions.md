@@ -125,11 +125,11 @@ In the following steps, we provide implementation details for each component of 
 
 > ℹ️ &nbsp;**GENERAL NAMING CONVENTION** &nbsp; ℹ️ 
 > 
-> Throughout this predict, unless directly stated, there is no enforced naming convention for AWS services created. However, as a means to keep your working environment organised, you may want to adopt a naming convention such as de-mbd-predict-{service name}. We use this convention throughout the model's solution implementation.  
+> Throughout this predict, unless directly stated, there is an enforced naming convention for AWS services created. However, as a means to keep your working environment organised, you may want to adopt a naming convention such as {cohort}{first three letters of name and surname}-mbd-predict-{service name} (e.g. FTDE2304DOREXP-mbd-predict-security-group). We use this convention throughout the solution's implementation.  
 
 #### Security
 As the first step towards building the data pipeline, you are required to set up the necessary security and access permissions. You will need to configure the following: 
- - **Security groups**: You need to create a security group that will give you access to the AWS services and allows communication between the pipeline’s various services and components. Use the below **inbound** and **outbound** rules to control network traffic.
+ - **Security groups**: You need to create a security group that will give you access to the AWS services and allows communication between the pipeline’s various services and components. Implement the naming convention when creating the name for the security group. Use the below **inbound** and **outbound** rules to control network traffic.
      
      - **Inbound rules**: Permit all traffic from the security group, in addition to your IP address, to have access to the RDS instance running on port `5432`. Additionally, permit `ssh` connections from your IP address.
 
@@ -155,8 +155,7 @@ As the first step towards building the data pipeline, you are required to set up
 
 
  - **IAM role policies**
- The data pipeline will need to perform multiple actions using different AWS services.
-   - Create a new IAM role for an EC2 instance to include the policies and trust relationships below: 
+ The data pipeline will need to perform multiple actions using different AWS services. The data pipeline uses a specific role to mount an S3 bucket to an EC2 instance. The role you will use is **MBD_Predict_Mounting_Role**. It has the policies and trust relationships below: 
       
       | Policies | Trust Relationships |
       | -------- | ------------------- |
@@ -182,7 +181,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
  - **Configure the source S3 bucket**
    > ℹ️ &nbsp;**S3 NAMING CONVENTION** &nbsp; ℹ️ 
    > 
-   > Use the following naming convention when creating your S3 bucket within this step: "de-mbd-predict-{firstname}-{lastname}-s3-source". For example, if you were named Dora Explorer, your configured name would be "de-mbd-predict-dora-explorer-s3-source". 
+   > Use the following naming convention when creating your S3 bucket within this step: "{cohort}-mbd-predict-{firstname}-{lastname}-s3-source". For example, if you were named Dora Explorer in the January 2023 part time cohort, your configured name would be "FTDE2301-mbd-predict-dora-explorer-s3-source". 
 
    1. Create an S3 bucket that will be used for the pipeline to store source data, processing scripts, and log files.
    2. To accommodate various pipeline elements, create the following folder structure in your S3 bucket:
@@ -233,11 +232,11 @@ When creating the data pipeline, you will need to store multiple artefacts for d
     | Instance type           | `t2.medium` |
     | VPC                   | default |  
     | Storage                   | 30GB SSD Volume |  
-    | Tag-based name     | ex. "Name: de-mbd-predict-EC2" | 
+    | Tag-based name     | ex. "Name: <cohort>-mbd-predict-{firstname}-{lastname}-EC2" | 
     | Security Group        | \<Newly created security group\> |  
-    | Security key | ex. "ec2-de-mbd-predict-key" |
+    | Security key | ex. "FTDE2304DOREXP-ec2-mbd-predict-key" |
 
-   2. Ensure that you save the resulting security key `.pem` file (ex. `ec2-de-mbd-predict-key.pem`) in a secure location. 
+   2. Ensure that you save the resulting security key `.pem` file (ex. `FTDE2304DOREXP-ec2-mbd-predict-key.pem`) in a secure location. 
 
    3. Connect to your remote instance via `SSH`, update the instance as prompted, then proceed to download and install the following dependencies:
       
@@ -246,7 +245,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
          2. **Pandas** to perform the required data manipulation; and
 
          3. **Latest version of the AWS Command Line Interface (CLI)** so that you can interact with AWS services on your EC2 instance. Don't forget to configure your AWS credentials.
-   4. Since you will complete the predict over a few weeks, you may find it useful to set a static IP for your EC2 instance. Otherwise you will have to continously obtain the new IP address that is allocated to your EC2 instance.
+   4. Since you will complete the predict over a few weeks, you may find it useful to set a static IP for your EC2 instance. Otherwise you will have to continously obtain the new IP address that is allocated to your EC2 instance. Static IP Addresses will be created and assigned to you by your facilitation team. You will need to your facilitator to allocate and attach an IP to your instance.
             
 
 
@@ -262,7 +261,7 @@ When creating the data pipeline, you will need to store multiple artefacts for d
    2. Once you have set up s3fs fuse, the below command can be used to assist in mounting your S3 Bucket. THe command assumes that the directory where the S3 bucket will be mounted is called 's3-drive'
 
         ```bash
-       s3fs -o iam_role=<your-ec2-role> -o url="https://s3.eu-west-1.amazonaws.com" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
+       s3fs -o iam_role=MBD_Predict_Mounting_Role -o url="https://s3.eu-west-1.amazonaws.com" -o endpoint=eu-west-1 -o allow_other -o curldbg <bucket-name> ~/s3-drive
        ```
 
 #### Data activities
@@ -290,9 +289,9 @@ When creating the data pipeline, you will need to store multiple artefacts for d
 
  - **Create database tables**
 
-   With the data processing activity configured, you can now perform data loading – moving the processed data from our mounted S3 bucket to the target RDS instance.
+   With the data processing activity configured, you can now perform data loading – moving the processed data from your mounted S3 bucket to the target RDS instance.
 
-   1. Download and install [pgAdmin](https://www.pgadmin.org/download/) for your operating system. As of writing, the latest stable release is pgAdmin4 (version 5.5).
+   1. Download and install [pgAdmin](https://www.pgadmin.org/download/) for your operating system. As of writing, the latest stable release is pgAdmin4 (version 8.1).
 
    2. Connect to your RDS instance using pgAdmin.
 
@@ -317,20 +316,20 @@ When creating the data pipeline, you will need to store multiple artefacts for d
 
    > 📝 &nbsp; **TOPIC NAMING CONVENTION**  &nbsp; 📝
    > 
-   > The topic name configured in SNS is utilised during the automated testing of the predict. As such, the following topic naming convention should be used: *"de-mbd-predict-{First-name}-{Surname}-SNS"*. For example, with the name Dora Explorer, the topic would be named "de-mbd-predict-dora-explorer-SNS".
+   > The topic name configured in SNS is utilised during the automated testing of the predict. As such, the following topic naming convention should be used: *"{cohort}-mbd-predict-{First-name}-{Surname}-SNS"*. For example, with the name Dora Explorer in the January 2023 part time cohort, the topic would be named "PTDE2301-mbd-predict-dora-explorer-SNS".
  
  - **Set up Amazon SNS pipeline monitoring alert**
 
 1. Create a **topic** and **subscription** for the pipeline notification.
    - You may create two subscriptions for your notifications:
       - The first can be your personal email, which you can use when debugging your pipeline.
-      - The second should be the edsa.predicts@explore-ai.net endpoint so that your predict can be marked.
+      - The second should be the predicts@sandtech.com endpoint so that your predict can be marked.
 
    <br>
 
    > 📝 &nbsp; **SNS PREDICT EMAIL ENDPOINT**  &nbsp; 📝
    >
-   > As in previous DE predicts, you will need to ensure that your generated email notifications are being sent to the `edsa.predicts@explore-ai.net` email address.  
+   > As in previous DE predicts, you will need to ensure that your generated email notifications are being sent to the `predicts@sandtech.com` email address.  
 
 ## Part-II: Pipeline assembly 
 [Back to top](#table-of-contents)
@@ -356,7 +355,7 @@ Make use of Docker and Airflow to achieve the architecture illustrated in *Figur
 
 > 📝 &nbsp; **SNS SUBJECT LINE**  &nbsp; 📝
 > 
-> As the failure and success email subject lines are used in the marking of the predict, please make sure that you adhere to the following naming convention: FirstName_Surname_Pipeline_Failure and FirstName_Surname_Pipeline_Success. 
+> As the failure and success email subject lines are used in the marking of the predict, please make sure that you adhere to the following naming convention: Cohort_FirstName_Surname_Pipeline_Failure and Cohort_FirstName_Surname_Pipeline_Success. 
 
 
 ### Pipeline monitoring 
@@ -425,7 +424,7 @@ As the initial step to enable the event-driven behaviour of your pipeline, you n
 
 > 📝 &nbsp; **BUCKET NAMING CONVENTION**  &nbsp; 📝
 >
-> Use the following convention when providing a bucket name: de-mbd-predict-{firstname}-{lastname}-monitored-bucket. For example, de-mbd-predict-dora-explorer-monitored-bucket.
+> Use the following convention when providing a bucket name: {cohort}-mbd-predict-{firstname}-{lastname}-monitored-bucket. For example, FTDE2301-mbd-predict-dora-explorer-monitored-bucket.
 
 
 ### Create an event-based lambda
@@ -455,13 +454,13 @@ Having completed your pipeline, submit a CSV containing your name, surname, sour
 
 | Name | Surname | Source_bucket | Monitored_bucket | SNS_topic | Static_IP |
 |------|---------|---------------|------------------|-----------|-----------|
-|Dora | Explorer | de-mbd-predict-dora-explorer-s3-source| de-mbd-predict-dora-explorer-monitored-bucket| de-mbd-predict-dora-explorer-SNS | 10.20.30.40 |
+|Dora | Explorer | FTDE2301-mbd-predict-dora-explorer-s3-source| FTDE2301-mbd-predict-dora-explorer-monitored-bucket| FTDE2301-mbd-predict-dora-explorer-SNS | 10.20.30.40 |
 
 
 > 📝 **STOP YOUR INSTANCE** 📝
 > 
-> You now that you have completed the pipeline you may **STOP** your instance. Your facilitors will let you know when to turn your EC2 on for marking purpose. 
-> It is important that you **DO NOT TERMINATE** you instanace, you must only **STOP** it. Failuire to adhere to this is instruction will make it impossible to mark your work.
+> Now that you have completed the pipeline you may **STOP** your instance. Your facilitors will let you know when to turn your EC2 on for marking purpose. 
+> It is important that you **DO NOT TERMINATE** your instance, you must only **STOP** it. Failuire to adhere to this is instruction will make it impossible to mark your work.
 
 ## Part-IV: Data pipelines MCQ
 [Back to top](#table-of-contents)
@@ -473,7 +472,7 @@ Now that you have completed your data pipeline, go ahead and answer the question
 ## Part-V: Post-predict clean-up
 [Back to top](#table-of-contents)
 
-Once the predict is completed and **has been assessed**, you must delete all the resources associated with the data pipeline to avoid any additional expense to your personal or lab account.  
+Once the predict is completed and **has been assessed**, you must delete **all** the resources associated with the data pipeline to avoid any additional expense.  
 
 The following is a checklist of all components associated with the implemented predict: 
  - [ ] Event-based lambda function
